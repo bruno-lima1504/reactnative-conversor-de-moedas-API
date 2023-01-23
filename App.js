@@ -1,52 +1,50 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View, ActivityIndicator, Keyboard } from 'react-native';
 
-import Seletor from './src/components/Seletor';
+import Selector from './src/components/Selector';
 import { api } from './src/services/api';
 
 export default function App() {
-  const [ moedas, setMoedas] = useState([]);
+  const [ coins, setCoins] = useState([]);
   const [ loading, setLoading ]  = useState(true);
 
-  const[moedaSelecionada, setMoedaSelecionada] = useState(null);
-  const[moedaBValor, setMoedaBValor] = useState(0);
+  const[coinSelected, setCoinsSelected] = useState(null);
+  const[coinBValue, setCoinBValue] = useState(0);
 
-  const [valorMoeda, setValorMoeda] = useState(null);
-  const [valorConvertido, setValorConvertido] = useState(0);
+  const [coinValue, setCoinValue] = useState(null);
+  const [convertedValue, setConvertedValue] = useState(0);
 
 
   useEffect(()=>{
-    async function loadMoedas(){
-      const response = await api.get('all');
+    async function loadCoins(){
+      const response = await api.get('all');      
       
-      let arrayMoedas = []
+      let arrayCoins = []
       Object.keys(response.data).map((key)=>{
-        arrayMoedas.push({
+        arrayCoins.push({
           key: key,
           label: key,
           value: key
         })
       })
 
-      setMoedas(arrayMoedas);
+      setCoins(arrayCoins);
       setLoading(false);         
     }
-    loadMoedas();
+    loadCoins();
     
   },[]);
 
-  async function converter(){
-    if(moedaSelecionada === null || moedaBValor === 0){
+  async function toConvert(){
+    if(coinSelected === null || coinBValue === 0){
       alert('Por favor selecione uma moeda.');
       return;
-    }
-    
+    }    
     //USD-BRL ele devolve quanto é 1 dolar convertido pra reais
-    const response = await api.get(`all/${moedaSelecionada}-BRL`);   
-    console.log(response.data[moedaSelecionada].ask)
-    let resultado = (response.data[moedaSelecionada].ask * parseFloat(moedaBValor) );
-    setValorConvertido(`R$ ${resultado.toFixed(2)}`);
-    setValorMoeda(moedaBValor)
+    const response = await api.get(`all/${coinSelected}-BRL`);
+    let result = (response.data[coinSelected].ask * parseFloat(coinBValue) );
+    setConvertedValue(`R$ ${result.toFixed(2)}`);
+    setCoinValue(coinBValue)
     
     Keyboard.dismiss();
   }
@@ -61,37 +59,37 @@ export default function App() {
     return (
       <View style={styles.container}>
   
-        <View style={styles.areaMoeda}>
-          <Text style={styles.titulo}>Selecione sua moeda</Text>
-          <Seletor moedas={moedas} onChange={ (moeda) => setMoedaSelecionada(moeda)  } coinSelecionada={moedaSelecionada}/>
+        <View style={styles.coinArea}>
+          <Text style={styles.title}>Selecione sua moeda</Text>
+          <Selector coins={coins} onChange={ (coin) => setCoinsSelected(coin)  } coinSelected={coinSelected}/>
         </View>
   
-        <View style={styles.areaValor}>
-          <Text style={styles.titulo}>Digite um valor para converter em (R$)</Text>
+        <View style={styles.valueArea}>
+          <Text style={styles.title}>Digite um valor para converter em (R$)</Text>
           <TextInput 
           placeholder= "EX: 150"
           style={styles.input}
-          onChangeText={ (valor) => setMoedaBValor(valor) }        
+          onChangeText={ (value) => setCoinBValue(value) }        
           keyboardType="numeric"
           />
         </View>
   
         <TouchableOpacity 
-          style={styles.botaoArea}
-          onPress={converter} >
-          <Text style={styles.botaoTexto}>Converter</Text>
+          style={styles.buttonArea}
+          onPress={toConvert} >
+          <Text style={styles.buttonText}>Converter</Text>
         </TouchableOpacity>
   
-        {valorConvertido !== 0 && (
-        <View style={styles.areaResultado}>
-          <Text style={styles.valorConvertido}>
-            {valorMoeda} {moedaSelecionada}
+        {convertedValue !== 0 && (
+        <View style={styles.resultArea}>
+          <Text style={styles.convertedValue}>
+            {coinValue} {coinSelected}
           </Text>
-          <Text style={[styles.valorConvertido, { fontSize: 18, margin: 10 }]}>
+          <Text style={[styles.convertedValue, { fontSize: 18, margin: 10 }]}>
             Corresponde a
           </Text>
-          <Text style={styles.valorConvertido}>
-            {valorConvertido}
+          <Text style={styles.convertedValue}>
+            {convertedValue}
           </Text>
         </View>
          )}  
@@ -108,7 +106,7 @@ const styles = StyleSheet.create({
     marginTop: 35,    
     paddingTop: 40,
   },
-  areaMoeda:{
+  coinArea:{
     width: '90%',
     backgroundColor: '#F9F9F9',
     paddingTop: 9,
@@ -116,13 +114,13 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 9,
     marginBottom: 1
   },
-  titulo:{
+  title:{
     fontSize: 15,
     color: '#000',
     paddingTop: 5,
     paddingLeft: 5,
   },
-  areaValor:{
+  valueArea:{
     width: '90%',
     backgroundColor: '#F9F9F9',
     paddingBottom: 9,
@@ -136,7 +134,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     color: '#000'
   },
-  botaoArea:{
+  buttonArea:{
     width: '90%',
     backgroundColor: '#FB4B57',
     height: 45,
@@ -145,12 +143,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center'
   },
-  botaoTexto:{
+  buttonText:{
     fontSize: 18,
     color: '#FFF',
     fontWeight: 'bold'
   },
-  areaResultado:{
+  resultArea:{
     width: '90%',
     backgroundColor: '#FFF',
     marginTop: 35,
@@ -158,7 +156,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 25
   },
-  valorConvertido:{
+  convertedValue:{
     fontSize: 39,
     fontWeight: 'bold',
     color: '#000'
